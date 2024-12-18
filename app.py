@@ -2,10 +2,10 @@ from flask import Flask, request, Response, stream_with_context, jsonify
 import requests
 import os
 import logging
-import whisper
+# import whisper
 import tempfile
 import torch
-import whisperx
+# import whisperx
 import gc
 
 app = Flask(__name__)
@@ -73,109 +73,109 @@ def proxy(path):
                     content_type=resp.headers.get('Content-Type'),
                     status=resp.status_code)
 
-@app.route('/transcribe', methods=['POST'])
-def transcribe_audio():
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    logging.info(f"New transcription request from IP: {ip}")
+# @app.route('/transcribe', methods=['POST'])
+# def transcribe_audio():
+#     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+#     logging.info(f"New transcription request from IP: {ip}")
     
-    if not validate_ip(ip):
-        logging.warning(f"Invalid IP: {ip}")
-        return "Unauthorized", 401
+#     if not validate_ip(ip):
+#         logging.warning(f"Invalid IP: {ip}")
+#         return "Unauthorized", 401
     
-    if not validate_api_key(request.headers.get('Authorization')):
-        logging.warning(f"Invalid API key from IP: {ip}")
-        return "Unauthorized", 401
+#     if not validate_api_key(request.headers.get('Authorization')):
+#         logging.warning(f"Invalid API key from IP: {ip}")
+#         return "Unauthorized", 401
 
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+#     if 'file' not in request.files:
+#         return jsonify({"error": "No file part"}), 400
     
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+#     file = request.files['file']
+#     if file.filename == '':
+#         return jsonify({"error": "No selected file"}), 400
 
-    if file:
-        # Salvar o arquivo temporariamente
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
-            file.save(temp_file.name)
-            temp_filename = temp_file.name
+#     if file:
+#         # Salvar o arquivo temporariamente
+#         with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
+#             file.save(temp_file.name)
+#             temp_filename = temp_file.name
 
-        try:
-            # Carregar o modelo Whisper (medium)
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            logging.info(f"Using device: {device}")
-            model = whisper.load_model("medium").to(device)
+#         try:
+#             # Carregar o modelo Whisper (medium)
+#             device = "cuda" if torch.cuda.is_available() else "cpu"
+#             logging.info(f"Using device: {device}")
+#             model = whisper.load_model("medium").to(device)
             
-            # Transcrever o áudio
-            logging.info("Starting transcription...")
-            result = model.transcribe(temp_filename)
-            logging.info("Transcription completed")
+#             # Transcrever o áudio
+#             logging.info("Starting transcription...")
+#             result = model.transcribe(temp_filename)
+#             logging.info("Transcription completed")
             
-            return jsonify({"transcription": result["text"]})
-        except Exception as e:
-            logging.error(f"Error during transcription: {str(e)}")
-            return jsonify({"error": "Transcription failed"}), 500
-        finally:
-            # Remover o arquivo temporário
-            os.unlink(temp_filename)
+#             return jsonify({"transcription": result["text"]})
+#         except Exception as e:
+#             logging.error(f"Error during transcription: {str(e)}")
+#             return jsonify({"error": "Transcription failed"}), 500
+#         finally:
+#             # Remover o arquivo temporário
+#             os.unlink(temp_filename)
 
-    return jsonify({"error": "File processing failed"}), 500
+#     return jsonify({"error": "File processing failed"}), 500
 
-@app.route('/transcribe_diarize', methods=['POST'])
-def transcribe_diarize_audio():
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    logging.info(f"New diarization request from IP: {ip}")
+# @app.route('/transcribe_diarize', methods=['POST'])
+# def transcribe_diarize_audio():
+#     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+#     logging.info(f"New diarization request from IP: {ip}")
     
-    if not validate_ip(ip):
-        logging.warning(f"Invalid IP: {ip}")
-        return "Unauthorized", 401
+#     if not validate_ip(ip):
+#         logging.warning(f"Invalid IP: {ip}")
+#         return "Unauthorized", 401
     
-    if not validate_api_key(request.headers.get('Authorization')):
-        logging.warning(f"Invalid API key from IP: {ip}")
-        return "Unauthorized", 401
+#     if not validate_api_key(request.headers.get('Authorization')):
+#         logging.warning(f"Invalid API key from IP: {ip}")
+#         return "Unauthorized", 401
 
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+#     if 'file' not in request.files:
+#         return jsonify({"error": "No file part"}), 400
     
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+#     file = request.files['file']
+#     if file.filename == '':
+#         return jsonify({"error": "No selected file"}), 400
 
-    if file:
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
-            file.save(temp_file.name)
-            temp_filename = temp_file.name
+#     if file:
+#         with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
+#             file.save(temp_file.name)
+#             temp_filename = temp_file.name
 
-        try:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            logging.info(f"Using device: {device}")
+#         try:
+#             device = "cuda" if torch.cuda.is_available() else "cpu"
+#             logging.info(f"Using device: {device}")
             
-            # 1. Transcribe with WhisperX
-            model = whisperx.load_model("large-v2", device, compute_type="float16")
-            audio = whisperx.load_audio(temp_filename)
-            result = model.transcribe(audio, batch_size=16)
-            logging.info("Transcription completed")
+#             # 1. Transcribe with WhisperX
+#             model = whisperx.load_model("large-v2", device, compute_type="float16")
+#             audio = whisperx.load_audio(temp_filename)
+#             result = model.transcribe(audio, batch_size=16)
+#             logging.info("Transcription completed")
 
-            # 2. Align whisper output
-            model_a, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
-            result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False)
-            logging.info("Alignment completed")
+#             # 2. Align whisper output
+#             model_a, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
+#             result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False)
+#             logging.info("Alignment completed")
 
-            # 3. Assign speaker labels using Hugging Face model
-            diarize_model = whisperx.DiarizationPipeline(use_auth_token=HF_TOKEN, device=device)
-            diarize_segments = diarize_model(audio)
-            result = whisperx.assign_word_speakers(diarize_segments, result)
-            logging.info("Diarization completed")
+#             # 3. Assign speaker labels using Hugging Face model
+#             diarize_model = whisperx.DiarizationPipeline(use_auth_token=HF_TOKEN, device=device)
+#             diarize_segments = diarize_model(audio)
+#             result = whisperx.assign_word_speakers(diarize_segments, result)
+#             logging.info("Diarization completed")
 
-            return jsonify({"result": result})
-        except Exception as e:
-            logging.error(f"Error during transcription and diarization: {str(e)}")
-            return jsonify({"error": "Transcription and diarization failed"}), 500
-        finally:
-            os.unlink(temp_filename)
-            gc.collect()
-            torch.cuda.empty_cache()
+#             return jsonify({"result": result})
+#         except Exception as e:
+#             logging.error(f"Error during transcription and diarization: {str(e)}")
+#             return jsonify({"error": "Transcription and diarization failed"}), 500
+#         finally:
+#             os.unlink(temp_filename)
+#             gc.collect()
+#             torch.cuda.empty_cache()
 
-    return jsonify({"error": "File processing failed"}), 500
+#     return jsonify({"error": "File processing failed"}), 500
 
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB
 

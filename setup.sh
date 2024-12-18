@@ -111,16 +111,25 @@ apt update && apt install ffmpeg -y
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source $HOME/.cargo/env
 
-# Instalar whisper e suas dependências
+# Instalacao com whisper
+# su - "$APP_USER" -c "
+#     cd $APP_DIR
+#     python3 -m venv venv
+#     source venv/bin/activate
+#     pip install -U pip setuptools-rust
+#     pip install -U openai-whisper
+#     pip install git+https://github.com/m-bain/whisperx.git
+#     pip install -r requirements.txt
+# "
+
+# Instalacao sem whisper
 su - "$APP_USER" -c "
-    cd $APP_DIR
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -U pip setuptools-rust
-    pip install -U openai-whisper
-    pip install git+https://github.com/m-bain/whisperx.git
-    pip install -r requirements.txt
-"
+#     cd $APP_DIR
+#     python3 -m venv venv
+#     source venv/bin/activate
+#     pip install -U pip setuptools-rust
+#     pip install -r requirements.txt
+# "
 
 cat > /etc/systemd/system/llm-app.service <<EOL
 [Unit]
